@@ -7,7 +7,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.produtividademaxima"
+        applicationId = "com.produtividadeMaxima"
         minSdk = 24
         targetSdk = 34
         versionCode = 1

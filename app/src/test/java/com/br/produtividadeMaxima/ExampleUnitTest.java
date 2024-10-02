@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package com.br.produtividadeMaxima;
 
 import org.junit.Test;
 
