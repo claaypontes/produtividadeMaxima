@@ -21,4 +21,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "Produtividade Máxima"
 include(":app")
- 
