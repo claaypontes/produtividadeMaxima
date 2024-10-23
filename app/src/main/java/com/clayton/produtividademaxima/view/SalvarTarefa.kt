@@ -2,6 +2,7 @@ package com.clayton.produtividademaxima.view
 
 import android.provider.MediaStore.Audio.Radio
 import android.widget.RadioButton
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -24,11 +25,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -38,11 +41,20 @@ import androidx.navigation.NavController
 import com.clayton.produtividademaxima.R
 import com.clayton.produtividademaxima.componentes.Botao
 import com.clayton.produtividademaxima.componentes.CaixaDeTexto
+import com.clayton.produtividademaxima.constantes.Constantes
+import com.clayton.produtividademaxima.repositorio.TarefasRepositorio
 import com.clayton.produtividademaxima.ui.theme.vinho
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SalvarTarefa(navController: NavController) {
+
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val tarefasRepositorio = TarefasRepositorio()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -164,6 +176,25 @@ fun SalvarTarefa(navController: NavController) {
             Botao(
                 onClick = {
                     // O que o botao vai fazer
+                    var mensagem = true
+                    scope.launch (Dispatchers.IO){
+                        if (tituloTarefa.isEmpty()) {
+                            mensagem = false
+                        }else if (tituloTarefa.isNotEmpty() && descricaoTarefa.isNotEmpty() && baixaPrioridadeTarefa){
+                            tarefasRepositorio.salvarTarefa(tituloTarefa, descricaoTarefa,Constantes.PRIORIDADE_BAIXA)
+                            mensagem = true
+                        }
+                    }
+                    scope.launch (Dispatchers.Main){
+                        if (mensagem){
+                            Toast.makeText(context, "Sucesso ao salvar a tarefa!", Toast.LENGTH_SHORT).show()
+                        }else{
+                            Toast.makeText(context, "Titulo da tarefa é obrigatorio!", Toast.LENGTH_SHORT).show()
+
+                        }
+
+                    }
+
                 },
                 modifier = Modifier
                     .fillMaxWidth()

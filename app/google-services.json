@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "423220177445",
+    "project_id": "produtividade-maxima",
+    "storage_bucket": "produtividade-maxima.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:423220177445:android:c22753d5ed36c61ca9adcc",
+        "android_client_info": {
+          "package_name": "com.clayton.produtividademaxima"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBw23UblXfqxruo-6WGy4s8UMHQQ-hbCgA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

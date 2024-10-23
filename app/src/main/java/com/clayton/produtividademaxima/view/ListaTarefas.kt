@@ -1,6 +1,10 @@
 package com.clayton.produtividademaxima.view
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -19,51 +23,51 @@ import com.clayton.produtividademaxima.R
 import com.clayton.produtividademaxima.itemlista.TarefaItem
 import com.clayton.produtividademaxima.model.Tarefa
 import com.clayton.produtividademaxima.ui.theme.vinho
+import com.google.firebase.ktx.Firebase
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListaTarefas(navController: NavController?) {
+
+
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Lista de Tarefas",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-
-                ) },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = vinho
-                )
+                title = {
+                    Text(
+                        "Lista de Tarefas",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = vinho)
             )
         },
         floatingActionButton = {
             FloatingActionButton(
                 containerColor = vinho,
                 onClick = {
-                    if (navController != null) {
-                        navController.navigate("salvarTarefa")
-                    }
+                    navController?.navigate("salvarTarefa")
                 },
-            ) { Image(imageVector = ImageVector.vectorResource(id = R.drawable.ic_add_botao),
-                contentDescription = "Icone de adicionar tarefa"
-
-            )
-
-
+            ) {
+                Image(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_add_botao),
+                    contentDescription = "Icone de adicionar tarefa"
+                )
             }
-
         }
-    ) { paddingValues ->
+    ) { paddingValues ->  // Usar paddingValues fornecido pelo Scaffold
         val listaTarefas: MutableList<Tarefa> = mutableListOf(
             Tarefa(
                 tarefa = "Criar um RPA",
                 descricao = "Preciso criar até o dia 15",
                 prioridade = 0
             ),
-
             Tarefa(
-                tarefa = "Passeiar com a esposa",
+                tarefa = "Passear com a esposa",
                 descricao = "Urgente",
                 prioridade = 1
             ),
@@ -73,12 +77,18 @@ fun ListaTarefas(navController: NavController?) {
                 prioridade = 3
             )
         )
-        LazyColumn {
-            itemsIndexed(listaTarefas){
-                    position, _->
-                TarefaItem(position,listaTarefas)
+
+        // Aplicar paddingValues dentro do LazyColumn
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),  // Aplicar o padding do Scaffold aqui
+            verticalArrangement = Arrangement.spacedBy(8.dp),  // Espaçamento entre os itens
+            contentPadding = PaddingValues(bottom = 16.dp)  // Espaçamento no final
+        ) {
+            itemsIndexed(listaTarefas) { position, _ ->
+                TarefaItem(position, listaTarefas)
             }
         }
-
     }
 }

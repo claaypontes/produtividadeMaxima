@@ -94,6 +94,7 @@ fun TarefaItem(
             Card(
                 modifier = Modifier
                     .size(30.dp)
+                    .padding(horizontal = 10.dp, vertical = 8.dp)
                     .constrainAs(cardPrioridade) {
                         top.linkTo(descricaoTexto.bottom, margin = 16.dp)
                         start.linkTo(prioridadeTexto.end, margin = 8.dp)
