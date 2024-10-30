@@ -1,44 +1,22 @@
 package com.clayton.produtividademaxima.view
 
-import android.provider.MediaStore.Audio.Radio
-import android.widget.RadioButton
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import android.widget.Toast
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.RadioButtonDefaults
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.clayton.produtividademaxima.R
 import com.clayton.produtividademaxima.componentes.Botao
 import com.clayton.produtividademaxima.componentes.CaixaDeTexto
 import com.clayton.produtividademaxima.constantes.Constantes
@@ -46,11 +24,12 @@ import com.clayton.produtividademaxima.repositorio.TarefasRepositorio
 import com.clayton.produtividademaxima.ui.theme.vinho
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SalvarTarefa(navController: NavController) {
-
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val tarefasRepositorio = TarefasRepositorio()
@@ -73,37 +52,53 @@ fun SalvarTarefa(navController: NavController) {
         },
     ) { paddingValues ->
 
-        var tituloTarefa by remember {
-            mutableStateOf(value = "")
-        }
+        var tituloTarefa by remember { mutableStateOf("") }
+        var descricaoTarefa by remember { mutableStateOf("") }
+        var status by remember { mutableStateOf(Constantes.A_FAZER) }
+        var prioridade by remember { mutableStateOf(Constantes.PRIORIDADE_BAIXA) }
 
-        var descricaoTarefa by remember {
-            mutableStateOf(value = "")
-        }
+        var dataVencimento by remember { mutableStateOf("") }
+        var horaVencimento by remember { mutableStateOf("") }
 
-        var semPrioridadeTarefa by remember {
-            mutableStateOf(value = false)
-        }
-        var baixaPrioridadeTarefa by remember {
-            mutableStateOf(value = false)
-        }
-        var altaPrioridadeTarefa by remember {
-            mutableStateOf(value = false)
-        }
+        val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+        val calendar = Calendar.getInstance()
 
+        // Date Picker dialog
+        val datePickerDialog = DatePickerDialog(
+            context,
+            { _, year, month, dayOfMonth ->
+                calendar.set(year, month, dayOfMonth)
+                dataVencimento = dateFormat.format(calendar.time)
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
 
-        // Conteúdo principal da tela
+        // Time Picker dialog
+        val timePickerDialog = TimePickerDialog(
+            context,
+            { _, hourOfDay, minute ->
+                calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
+                calendar.set(Calendar.MINUTE, minute)
+                horaVencimento = timeFormat.format(calendar.time)
+            },
+            calendar.get(Calendar.HOUR_OF_DAY),
+            calendar.get(Calendar.MINUTE),
+            true
+        )
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(paddingValues)  // Adiciona o paddingValues aqui
+                .padding(paddingValues)
         ) {
+            // Título da Tarefa
             CaixaDeTexto(
                 value = tituloTarefa,
-                onValueChange = {
-                    tituloTarefa = it
-                },
+                onValueChange = { tituloTarefa = it },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(20.dp, 20.dp, 20.dp, 0.dp),
@@ -111,90 +106,135 @@ fun SalvarTarefa(navController: NavController) {
                 maxLines = 1,
                 keyboardType = KeyboardType.Text
             )
+
+            // Descrição da Tarefa
             CaixaDeTexto(
                 value = descricaoTarefa,
-                onValueChange = {
-                    descricaoTarefa = it
-                },
+                onValueChange = { descricaoTarefa = it },
                 modifier = Modifier
-                    .fillMaxWidth().height(150.dp)
+                    .fillMaxWidth()
+                    .height(150.dp)
                     .padding(20.dp, 20.dp, 20.dp, 0.dp),
                 label = "Descrição",
                 maxLines = 3,
                 keyboardType = KeyboardType.Text
             )
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
+
+            // Data de Vencimento
+            Text(
+                text = "Data de Vencimento:",
+                fontWeight = FontWeight.Bold,
+                color = Color.Black,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
+            )
+            Button(
+                onClick = { datePickerDialog.show() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 10.dp)
             ) {
-                Text(text = "Prioridade da tarefa: ")
-
-                // Botao sem prioridade (Cinza - Neutro)
-                RadioButton(
-                    selected = semPrioridadeTarefa,
-                    onClick = {
-                        semPrioridadeTarefa = !semPrioridadeTarefa
-                        baixaPrioridadeTarefa = false
-                        altaPrioridadeTarefa = false
-                    },
-                    colors = RadioButtonDefaults.colors(
-                        selectedColor = Color.Gray,
-                        unselectedColor = Color.LightGray
-                    )
-                )
-
-                // Botao baixa Prioridade (Verde)
-                RadioButton(
-                    selected = baixaPrioridadeTarefa,
-                    onClick = {
-                        baixaPrioridadeTarefa = !baixaPrioridadeTarefa
-                        semPrioridadeTarefa = false
-                        altaPrioridadeTarefa = false
-                    },
-                    colors = RadioButtonDefaults.colors(
-                        selectedColor = Color.Green,
-                        unselectedColor = Color.LightGray
-                    )
-                )
-
-                // Botao alta Prioridade (Vermelho)
-                RadioButton(
-                    selected = altaPrioridadeTarefa,
-                    onClick = {
-                        altaPrioridadeTarefa = !altaPrioridadeTarefa
-                        semPrioridadeTarefa = false
-                        baixaPrioridadeTarefa = false
-                    },
-                    colors = RadioButtonDefaults.colors(
-                        selectedColor = Color.Red,
-                        unselectedColor = Color.LightGray
-                    )
-                )
+                Text(text = if (dataVencimento.isEmpty()) "Selecionar Data" else dataVencimento)
             }
 
+            // Hora de Vencimento
+            Text(
+                text = "Hora de Vencimento:",
+                fontWeight = FontWeight.Bold,
+                color = Color.Black,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
+            )
+            Button(
+                onClick = { timePickerDialog.show() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 10.dp)
+            ) {
+                Text(text = if (horaVencimento.isEmpty()) "Selecionar Hora" else horaVencimento)
+            }
+
+            // Configuração dos RadioButtons para o status
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp)
+            ) {
+                Text(text = "Status da tarefa:", fontWeight = FontWeight.Bold, color = Color.Black)
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    RadioButton(
+                        selected = status == Constantes.A_FAZER,
+                        onClick = { status = Constantes.A_FAZER }
+                    )
+                    Text(text = "A Fazer")
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    RadioButton(
+                        selected = status == Constantes.EM_PROGRESSO,
+                        onClick = { status = Constantes.EM_PROGRESSO }
+                    )
+                    Text(text = "Em Progresso")
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    RadioButton(
+                        selected = status == Constantes.CONCLUIDO,
+                        onClick = { status = Constantes.CONCLUIDO }
+                    )
+                    Text(text = "Concluído")
+                }
+            }
+
+            // Configuração dos RadioButtons para a prioridade
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp)
+            ) {
+                Text(text = "Prioridade da tarefa:", fontWeight = FontWeight.Bold, color = Color.Black)
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    RadioButton(
+                        selected = prioridade == Constantes.PRIORIDADE_BAIXA,
+                        onClick = { prioridade = Constantes.PRIORIDADE_BAIXA }
+                    )
+                    Text(text = "Baixa")
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    RadioButton(
+                        selected = prioridade == Constantes.PRIORIDADE_MEDIA,
+                        onClick = { prioridade = Constantes.PRIORIDADE_MEDIA }
+                    )
+                    Text(text = "Média")
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    RadioButton(
+                        selected = prioridade == Constantes.PRIORIDADE_ALTA,
+                        onClick = { prioridade = Constantes.PRIORIDADE_ALTA }
+                    )
+                    Text(text = "Alta")
+                }
+            }
+
+            // Botão de Salvar Tarefa
             Botao(
                 onClick = {
-                    // O que o botao vai fazer
-                    var mensagem = true
-                    scope.launch (Dispatchers.IO){
-                        if (tituloTarefa.isEmpty()) {
-                            mensagem = false
-                        }else if (tituloTarefa.isNotEmpty() && descricaoTarefa.isNotEmpty() && baixaPrioridadeTarefa){
-                            tarefasRepositorio.salvarTarefa(tituloTarefa, descricaoTarefa,Constantes.PRIORIDADE_BAIXA)
-                            mensagem = true
+                    if (tituloTarefa.isEmpty() || dataVencimento.isEmpty() || horaVencimento.isEmpty()) {
+                        Toast.makeText(context, "Preencha o título, data e hora de vencimento!", Toast.LENGTH_SHORT).show()
+                    } else {
+                        scope.launch(Dispatchers.IO) {
+                            val dataHoraVencimentoTimestamp = calendar.time
+                            tarefasRepositorio.salvarTarefa(
+                                tituloTarefa,
+                                descricaoTarefa,
+                                prioridade,
+                                status,
+                                dataHoraVencimentoTimestamp
+                            )
+                            scope.launch(Dispatchers.Main) {
+                                Toast.makeText(context, "Sucesso ao salvar a tarefa!", Toast.LENGTH_SHORT).show()
+                                navController.popBackStack()
+                            }
                         }
                     }
-                    scope.launch (Dispatchers.Main){
-                        if (mensagem){
-                            Toast.makeText(context, "Sucesso ao salvar a tarefa!", Toast.LENGTH_SHORT).show()
-                        }else{
-                            Toast.makeText(context, "Titulo da tarefa é obrigatorio!", Toast.LENGTH_SHORT).show()
-
-                        }
-
-                    }
-
                 },
                 modifier = Modifier
                     .fillMaxWidth()

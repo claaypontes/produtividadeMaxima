@@ -59,6 +59,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.espresso.core)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -66,11 +67,21 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    implementation(platform("com.google.firebase:firebase-bom:33.5.0"))
+    implementation(platform("com.google.firebase:firebase-bom:32.3.1"))
+    implementation ("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation("io.coil-kt:coil-compose:2.1.0")
+    implementation("io.coil-kt:coil-svg:2.1.0")
+    implementation ("com.google.accompanist:accompanist-swiperefresh:0.30.1")
+    implementation ("com.google.accompanist:accompanist-pager:0.26.5-rc")
+    implementation ("androidx.compose.material:material-icons-extended:1.5.0")
+// Use a última versão disponível
+
+
 
     // importando o compose para navegar
     val navVersion = "2.5.3"
     implementation("androidx.navigation:navigation-compose:$navVersion")
     implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
+    implementation(kotlin("script-runtime"))
 }
