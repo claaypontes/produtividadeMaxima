@@ -68,10 +68,12 @@ class DataSource {
         for (documento in snapshot.documents) {
             val tarefa = documento.toObject(Tarefa::class.java)
             if (tarefa != null) {
-                // Conversão explícita de Timestamp para Date se necessário
-                val timestamp = documento.getTimestamp("dataVencimento")
-                if (timestamp != null) {
-                    tarefa.dataHoraVencimento = timestamp.toDate()
+                // Verifica se `dataVencimento` é Timestamp ou Date e converte para Date conforme necessário
+                val dataVencimento = documento.get("dataVencimento")
+                tarefa.dataHoraVencimento = when (dataVencimento) {
+                    is com.google.firebase.Timestamp -> dataVencimento.toDate()
+                    is Date -> dataVencimento
+                    else -> Date() // Define uma data padrão caso não esteja presente ou seja de tipo desconhecido
                 }
                 listaAtualizada.add(tarefa)
             }
