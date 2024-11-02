@@ -61,15 +61,20 @@ fun ListaTarefas(navController: NavController?) {
             tarefasRepositorio.recuperarTarefasDoUsuario().collect { tarefas ->
                 listaTarefas = tarefas.filter { tarefa ->
                     filtroData?.let { dataFiltro ->
-                        val dataTarefa = Calendar.getInstance().apply {
-                            timeInMillis = tarefa.dataHoraVencimento.time
+                        // Verifica se `dataHoraVencimento` é do tipo `Date` e configura `Calendar` adequadamente
+                        val dataTarefaCal = Calendar.getInstance().apply {
+                            if (tarefa.dataHoraVencimento is Date) {
+                                time = tarefa.dataHoraVencimento as Date
+                            }
                         }
                         val dataFiltroCal = Calendar.getInstance().apply {
                             time = dataFiltro
                         }
-                        dataTarefa.get(Calendar.YEAR) == dataFiltroCal.get(Calendar.YEAR) &&
-                                dataTarefa.get(Calendar.MONTH) == dataFiltroCal.get(Calendar.MONTH) &&
-                                dataTarefa.get(Calendar.DAY_OF_MONTH) == dataFiltroCal.get(Calendar.DAY_OF_MONTH)
+                        // Compara ano, mês e dia para verificar se coincidem com o filtro de data
+                        tarefa.dataHoraVencimento is Date &&
+                                dataTarefaCal.get(Calendar.YEAR) == dataFiltroCal.get(Calendar.YEAR) &&
+                                dataTarefaCal.get(Calendar.MONTH) == dataFiltroCal.get(Calendar.MONTH) &&
+                                dataTarefaCal.get(Calendar.DAY_OF_MONTH) == dataFiltroCal.get(Calendar.DAY_OF_MONTH)
                     } ?: true
                 }
                 isRefreshing.value = false

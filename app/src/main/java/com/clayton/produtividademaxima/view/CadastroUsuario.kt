@@ -16,7 +16,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CadastroUsuario(navController: NavController?) {
@@ -53,18 +52,22 @@ fun CadastroUsuario(navController: NavController?) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.Center
         ) {
+            val textFieldColors = TextFieldDefaults.textFieldColors(
+                containerColor = Color(0xFFF0F0F0),
+                focusedIndicatorColor = PrimaryColor,
+                unfocusedIndicatorColor = Color.Black,
+                focusedTextColor = Color.Black,
+                unfocusedTextColor = Color.Black,
+                unfocusedLabelColor = Color.Black,
+                focusedLabelColor = Color.Black
+            )
+
             // Campo de Nome
             TextField(
                 value = nome,
                 onValueChange = { nome = it },
-                label = { Text(text = "Nome", color = SecondaryColor) },
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color(0xFFF0F0F0),
-                    focusedIndicatorColor = PrimaryColor,
-                    unfocusedIndicatorColor = Color.Gray,
-                    focusedTextColor = Color.Black,
-                    focusedPlaceholderColor = Color.Gray
-                ),
+                label = { Text(text = "Nome") },
+                colors = textFieldColors,
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -73,14 +76,8 @@ fun CadastroUsuario(navController: NavController?) {
             TextField(
                 value = sobrenome,
                 onValueChange = { sobrenome = it },
-                label = { Text(text = "Sobrenome", color = SecondaryColor) },
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color(0xFFF0F0F0),
-                    focusedIndicatorColor = PrimaryColor,
-                    unfocusedIndicatorColor = Color.Gray,
-                    focusedTextColor = Color.Black,
-                    focusedPlaceholderColor = Color.Gray
-                ),
+                label = { Text(text = "Sobrenome") },
+                colors = textFieldColors,
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -89,14 +86,8 @@ fun CadastroUsuario(navController: NavController?) {
             TextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text(text = "Email", color = SecondaryColor) },
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color(0xFFF0F0F0),
-                    focusedIndicatorColor = PrimaryColor,
-                    unfocusedIndicatorColor = Color.Gray,
-                    focusedTextColor = Color.Black,
-                    focusedPlaceholderColor = Color.Gray
-                ),
+                label = { Text(text = "Email") },
+                colors = textFieldColors,
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -105,15 +96,9 @@ fun CadastroUsuario(navController: NavController?) {
             TextField(
                 value = senha,
                 onValueChange = { senha = it },
-                label = { Text(text = "Senha", color = SecondaryColor) },
+                label = { Text(text = "Senha") },
                 visualTransformation = PasswordVisualTransformation(),
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color(0xFFF0F0F0),
-                    focusedIndicatorColor = PrimaryColor,
-                    unfocusedIndicatorColor = Color.Gray,
-                    focusedTextColor = Color.Black,
-                    focusedPlaceholderColor = Color.Gray
-                ),
+                colors = textFieldColors,
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -122,15 +107,9 @@ fun CadastroUsuario(navController: NavController?) {
             TextField(
                 value = confirmSenha,
                 onValueChange = { confirmSenha = it },
-                label = { Text(text = "Confirme a Senha", color = SecondaryColor) },
+                label = { Text(text = "Confirme a Senha") },
                 visualTransformation = PasswordVisualTransformation(),
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color(0xFFF0F0F0),
-                    focusedIndicatorColor = PrimaryColor,
-                    unfocusedIndicatorColor = Color.Gray,
-                    focusedTextColor = Color.Black,
-                    focusedPlaceholderColor = Color.Gray
-                ),
+                colors = textFieldColors,
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))

@@ -1,5 +1,6 @@
 package com.clayton.produtividademaxima
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -8,16 +9,25 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.work.*
+import com.clayton.produtividademaxima.datasource.TarefaNotifierWorker
 import com.clayton.produtividademaxima.ui.theme.ProdutividadeMáximaTheme
 import com.clayton.produtividademaxima.view.CadastroUsuario
 import com.clayton.produtividademaxima.view.ListaTarefas
 import com.clayton.produtividademaxima.view.LoginUsuario
 import com.clayton.produtividademaxima.view.SalvarTarefa
 import com.google.firebase.auth.FirebaseAuth
+import java.util.concurrent.TimeUnit
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Solicita permissão de notificação no Android 13+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 0)
+        }
+
         setContent {
             ProdutividadeMáximaTheme {
 
@@ -38,6 +48,34 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
+        // Agenda a notificação para verificar periodicamente
+        agendarNotificacaoTarefas()
+
+        // Executa uma verificação única para teste
+        executarTesteNotificacao()
+    }
+
+    private fun agendarNotificacaoTarefas() {
+        val tarefaWorkRequest = PeriodicWorkRequestBuilder<TarefaNotifierWorker>(60, TimeUnit.SECONDS)
+            .setConstraints(
+                Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .build()
+            )
+            .build()
+
+        WorkManager.getInstance(applicationContext).enqueueUniquePeriodicWork(
+            "notificacao_tarefas_vencidas",
+            ExistingPeriodicWorkPolicy.REPLACE,
+            tarefaWorkRequest
+        )
+    }
+
+    // Executa uma verificação única imediata para fins de teste
+    private fun executarTesteNotificacao() {
+        val tarefaWorkRequest = OneTimeWorkRequestBuilder<TarefaNotifierWorker>().build()
+        WorkManager.getInstance(applicationContext).enqueue(tarefaWorkRequest)
     }
 }
 
@@ -51,10 +89,11 @@ fun NavGraph(navController: NavHostController, startDestination: String) {
             SalvarTarefa(navController)
         }
         composable("cadastroUsuario") {
-            CadastroUsuario(navController)  // Tela de cadastro que será criada
+            CadastroUsuario(navController)  // Tela de cadastro
         }
         composable("login") {
             LoginUsuario(navController)
+
         }
     }
 }

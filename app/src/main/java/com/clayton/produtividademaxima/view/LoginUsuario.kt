@@ -71,9 +71,10 @@ fun LoginUsuario(navController: NavController?) {
                 colors = TextFieldDefaults.textFieldColors(
                     containerColor = Color(0xFFF0F0F0),
                     focusedIndicatorColor = PrimaryColor,
-                    unfocusedIndicatorColor = Color.Gray,
+                    unfocusedIndicatorColor = Color.Black,
                     focusedTextColor = Color.Black,
-                    focusedPlaceholderColor = Color.Gray
+                    unfocusedTextColor = Color.Black,
+                    focusedPlaceholderColor = Color.Black
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -97,6 +98,7 @@ fun LoginUsuario(navController: NavController?) {
                     focusedIndicatorColor = PrimaryColor,
                     unfocusedIndicatorColor = Color.Gray,
                     focusedTextColor = Color.Black,
+                    unfocusedTextColor = Color.Black,
                     focusedPlaceholderColor = Color.Gray
                 ),
                 modifier = Modifier

@@ -7,7 +7,7 @@ data class Tarefa(
     var descricao: String = "",
     var prioridade: Int = 0,
     var status: Int = 0,  // Suporta o Kanban
-    var dataHoraVencimento: Date = Date()  // Campo para a data e hora de vencimento
+    var dataHoraVencimento: Any? = null// Campo para a data e hora de vencimento
 ) {
     val id: String
         get() {

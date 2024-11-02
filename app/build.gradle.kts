@@ -75,6 +75,7 @@ dependencies {
     implementation ("com.google.accompanist:accompanist-swiperefresh:0.30.1")
     implementation ("com.google.accompanist:accompanist-pager:0.26.5-rc")
     implementation ("androidx.compose.material:material-icons-extended:1.5.0")
+    implementation ("androidx.work:work-runtime-ktx:2.8.1")
 // Use a última versão disponível
 
 

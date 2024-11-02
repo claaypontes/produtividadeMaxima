@@ -9,22 +9,33 @@ class TarefasRepositorio {
 
     private val dataSource = DataSource()
 
-    // Agora incluindo o status e a data de vencimento ao salvar a tarefa
+    // Função para salvar a tarefa com prioridade, status e data de vencimento
     fun salvarTarefa(tarefa: String, descricao: String, prioridade: Int, status: Int, dataVencimento: Date) {
         dataSource.salvarTarefa(tarefa, descricao, prioridade, status, dataVencimento)
     }
 
-    // Corrigido: não passamos o userId aqui, pois ele já é obtido no DataSource
+    // Função para recuperar todas as tarefas do usuário autenticado
     fun recuperarTarefasDoUsuario(): Flow<MutableList<Tarefa>> {
         return dataSource.recuperarTarefasDoUsuario()
     }
 
+    // Função para deletar uma tarefa pelo nome
     fun deletarTarefa(tarefa: String) {
         dataSource.deletarTarefa(tarefa)
     }
 
-    // Novo método para atualizar o status de uma tarefa
+    // Função para atualizar o status de uma tarefa
     fun atualizarStatusTarefa(tarefa: Tarefa, novoStatus: Int) {
         dataSource.atualizarStatusTarefa(tarefa, novoStatus)
+    }
+
+    // Função para obter uma tarefa específica pelo ID
+    suspend fun getTarefaById(tarefaId: String): Tarefa? {
+        return dataSource.getTarefaById(tarefaId)
+    }
+
+    // Função para atualizar uma tarefa completa (nome, descrição, prioridade, data de vencimento, etc.)
+    suspend fun atualizarTarefa(tarefa: Tarefa) {
+        dataSource.atualizarTarefa(tarefa)
     }
 }

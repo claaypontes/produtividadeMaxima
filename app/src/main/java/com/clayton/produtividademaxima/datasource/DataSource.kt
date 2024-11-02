@@ -8,6 +8,7 @@ import com.google.firebase.firestore.QuerySnapshot
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.tasks.await
 import java.util.Date
 
 class DataSource {
@@ -38,6 +39,32 @@ class DataSource {
             .addOnFailureListener { exception ->
                 Log.e("Firebase", "Erro ao salvar tarefa no Firestore: ${exception.message}")
             }
+    }
+    // Função para atualizar uma tarefa completa (nome, descrição, prioridade)
+    suspend fun atualizarTarefa(tarefa: Tarefa) {
+        val tarefaMap = mapOf(
+            "tarefa" to tarefa.tarefa,
+            "descricao" to tarefa.descricao,
+            "status" to tarefa.status,
+            "prioridade" to tarefa.prioridade,
+            "dataVencimento" to tarefa.dataHoraVencimento
+        )
+        try {
+            db.collection("tarefas").document(tarefa.tarefa).update(tarefaMap).await()
+            Log.d("Firebase", "Tarefa atualizada com sucesso no Firestore.")
+        } catch (e: Exception) {
+            Log.e("Firebase", "Erro ao atualizar a tarefa: ${e.message}")
+        }
+    }
+    // k
+    suspend fun getTarefaById(tarefaId: String): Tarefa? {
+        return try {
+            val document = db.collection("tarefas").document(tarefaId).get().await()
+            document.toObject(Tarefa::class.java)
+        } catch (e: Exception) {
+            Log.e("DataSource", "Erro ao recuperar tarefa por ID: ${e.message}")
+            null
+        }
     }
 
     // Função para recuperar as tarefas em tempo real do usuário autenticado

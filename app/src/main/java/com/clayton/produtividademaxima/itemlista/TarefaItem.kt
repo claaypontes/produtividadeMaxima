@@ -1,6 +1,7 @@
 package com.clayton.produtividademaxima.itemlista
 
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -65,7 +66,12 @@ fun TarefaItem(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 IconButton(onClick = {
-                    navController.navigate("editarTarefa/${tarefa.id}")
+                    tarefa.id?.let { id ->
+                        navController.navigate("editarTarefa/$id")
+                    } ?: run {
+                        // Log ou mensagem de erro para depuração se o ID estiver faltando
+                        Log.e("TarefaItem", "ID da tarefa é nulo.")
+                    }
                 }) {
                     Icon(
                         imageVector = Icons.Filled.Edit,
