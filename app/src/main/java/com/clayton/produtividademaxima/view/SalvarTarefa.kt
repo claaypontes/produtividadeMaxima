@@ -21,7 +21,6 @@ import com.clayton.produtividademaxima.componentes.Botao
 import com.clayton.produtividademaxima.componentes.CaixaDeTexto
 import com.clayton.produtividademaxima.constantes.Constantes
 import com.clayton.produtividademaxima.repositorio.TarefasRepositorio
-import com.clayton.produtividademaxima.ui.theme.vinho
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -40,14 +39,12 @@ fun SalvarTarefa(navController: NavController) {
                 title = {
                     Text(
                         "Adicionar Tarefa",
-                        fontSize = 18.sp,
+                        fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = vinho
-                )
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = PrimaryColor)
             )
         },
     ) { paddingValues ->
@@ -89,132 +86,109 @@ fun SalvarTarefa(navController: NavController) {
             true
         )
 
+        val textColor = MaterialTheme.colorScheme.onBackground
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(paddingValues)
         ) {
-            // Título da Tarefa
             CaixaDeTexto(
                 value = tituloTarefa,
                 onValueChange = { tituloTarefa = it },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp, 20.dp, 20.dp, 0.dp),
-                label = "Titulo da Tarefa",
+                    .padding(16.dp),
+                label = "Título da Tarefa",
                 maxLines = 1,
                 keyboardType = KeyboardType.Text
             )
 
-            // Descrição da Tarefa
             CaixaDeTexto(
                 value = descricaoTarefa,
                 onValueChange = { descricaoTarefa = it },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(150.dp)
-                    .padding(20.dp, 20.dp, 20.dp, 0.dp),
+                    .padding(16.dp),
                 label = "Descrição",
                 maxLines = 3,
                 keyboardType = KeyboardType.Text
             )
 
-            // Data de Vencimento
             Text(
                 text = "Data de Vencimento:",
                 fontWeight = FontWeight.Bold,
-                color = Color.Black,
-                modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
+                color = textColor,
+                modifier = Modifier.padding(start = 16.dp, top = 8.dp)
             )
-            Button(
+            OutlinedButton(
                 onClick = { datePickerDialog.show() },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 10.dp)
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
-                Text(text = if (dataVencimento.isEmpty()) "Selecionar Data" else dataVencimento)
+                Text(text = if (dataVencimento.isEmpty()) "Selecionar Data" else dataVencimento, color = PrimaryColor)
             }
 
-            // Hora de Vencimento
             Text(
                 text = "Hora de Vencimento:",
                 fontWeight = FontWeight.Bold,
-                color = Color.Black,
-                modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
+                color = textColor,
+                modifier = Modifier.padding(start = 16.dp, top = 8.dp)
             )
-            Button(
+            OutlinedButton(
                 onClick = { timePickerDialog.show() },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 10.dp)
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
-                Text(text = if (horaVencimento.isEmpty()) "Selecionar Hora" else horaVencimento)
+                Text(text = if (horaVencimento.isEmpty()) "Selecionar Hora" else horaVencimento, color = PrimaryColor)
             }
 
-            // Configuração dos RadioButtons para o status
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp)
+                    .padding(16.dp)
             ) {
-                Text(text = "Status da tarefa:", fontWeight = FontWeight.Bold, color = Color.Black)
+                Text(text = "Status da Tarefa:", fontWeight = FontWeight.Bold, color = textColor)
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(
-                        selected = status == Constantes.A_FAZER,
-                        onClick = { status = Constantes.A_FAZER }
-                    )
-                    Text(text = "A Fazer")
+                    RadioButton(selected = status == Constantes.A_FAZER, onClick = { status = Constantes.A_FAZER })
+                    Text(text = "A Fazer", color = textColor)
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(
-                        selected = status == Constantes.EM_PROGRESSO,
-                        onClick = { status = Constantes.EM_PROGRESSO }
-                    )
-                    Text(text = "Em Progresso")
+                    RadioButton(selected = status == Constantes.EM_PROGRESSO, onClick = { status = Constantes.EM_PROGRESSO })
+                    Text(text = "Em Progresso", color = textColor)
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(
-                        selected = status == Constantes.CONCLUIDO,
-                        onClick = { status = Constantes.CONCLUIDO }
-                    )
-                    Text(text = "Concluído")
+                    RadioButton(selected = status == Constantes.CONCLUIDO, onClick = { status = Constantes.CONCLUIDO })
+                    Text(text = "Concluído", color = textColor)
                 }
             }
 
-            // Configuração dos RadioButtons para a prioridade
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp)
+                    .padding(16.dp)
             ) {
-                Text(text = "Prioridade da tarefa:", fontWeight = FontWeight.Bold, color = Color.Black)
+                Text(text = "Prioridade da Tarefa:", fontWeight = FontWeight.Bold, color = textColor)
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(
-                        selected = prioridade == Constantes.PRIORIDADE_BAIXA,
-                        onClick = { prioridade = Constantes.PRIORIDADE_BAIXA }
-                    )
-                    Text(text = "Baixa")
+                    RadioButton(selected = prioridade == Constantes.PRIORIDADE_BAIXA, onClick = { prioridade = Constantes.PRIORIDADE_BAIXA })
+                    Text(text = "Baixa", color = textColor)
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(
-                        selected = prioridade == Constantes.PRIORIDADE_MEDIA,
-                        onClick = { prioridade = Constantes.PRIORIDADE_MEDIA }
-                    )
-                    Text(text = "Média")
+                    RadioButton(selected = prioridade == Constantes.PRIORIDADE_MEDIA, onClick = { prioridade = Constantes.PRIORIDADE_MEDIA })
+                    Text(text = "Média", color = textColor)
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(
-                        selected = prioridade == Constantes.PRIORIDADE_ALTA,
-                        onClick = { prioridade = Constantes.PRIORIDADE_ALTA }
-                    )
-                    Text(text = "Alta")
+                    RadioButton(selected = prioridade == Constantes.PRIORIDADE_ALTA, onClick = { prioridade = Constantes.PRIORIDADE_ALTA })
+                    Text(text = "Alta", color = textColor)
                 }
             }
 
-            // Botão de Salvar Tarefa
             Botao(
                 onClick = {
                     if (tituloTarefa.isEmpty() || dataVencimento.isEmpty() || horaVencimento.isEmpty()) {

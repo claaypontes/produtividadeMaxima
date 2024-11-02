@@ -2,13 +2,11 @@ package com.clayton.produtividademaxima.view
 
 import android.app.DatePickerDialog
 import android.widget.Toast
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.MoreVert
@@ -16,10 +14,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -54,14 +50,12 @@ fun ListaTarefas(navController: NavController?) {
 
     val columnTitles = listOf("A Fazer", "Em Progresso", "Concluído")
 
-    // Função para atualizar a lista de tarefas com base no filtro de data
     fun atualizarLista() {
         isRefreshing.value = true
         scope.launch {
             tarefasRepositorio.recuperarTarefasDoUsuario().collect { tarefas ->
                 listaTarefas = tarefas.filter { tarefa ->
                     filtroData?.let { dataFiltro ->
-                        // Verifica se `dataHoraVencimento` é do tipo `Date` e configura `Calendar` adequadamente
                         val dataTarefaCal = Calendar.getInstance().apply {
                             if (tarefa.dataHoraVencimento is Date) {
                                 time = tarefa.dataHoraVencimento as Date
@@ -70,7 +64,6 @@ fun ListaTarefas(navController: NavController?) {
                         val dataFiltroCal = Calendar.getInstance().apply {
                             time = dataFiltro
                         }
-                        // Compara ano, mês e dia para verificar se coincidem com o filtro de data
                         tarefa.dataHoraVencimento is Date &&
                                 dataTarefaCal.get(Calendar.YEAR) == dataFiltroCal.get(Calendar.YEAR) &&
                                 dataTarefaCal.get(Calendar.MONTH) == dataFiltroCal.get(Calendar.MONTH) &&
@@ -98,20 +91,7 @@ fun ListaTarefas(navController: NavController?) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Column {
-                        Text(
-                            text = "Lista de Tarefas",
-                            fontSize = 20.sp,
-                            color = Color.White
-                        )
-                        Text(
-                            text = "Olá, $nomeUsuario",
-                            fontSize = 14.sp,
-                            color = Color.White
-                        )
-                    }
-                },
+                title = { Text("Lista de Tarefas", fontSize = 20.sp, color = Color.White) },
                 actions = {
                     IconButton(onClick = {
                         abrirDialogoFiltro(context) { date ->
@@ -125,13 +105,12 @@ fun ListaTarefas(navController: NavController?) {
                             tint = Color.White
                         )
                     }
-                    // Botão para limpar o filtro de data
                     IconButton(onClick = {
                         filtroData = null
                         atualizarLista()
                     }) {
                         Icon(
-                            imageVector = Icons.Default.CheckCircle, // Escolha um ícone adequado
+                            imageVector = Icons.Default.CheckCircle,
                             contentDescription = "Limpar Filtro",
                             tint = Color.White
                         )
@@ -179,28 +158,41 @@ fun ListaTarefas(navController: NavController?) {
             }
         }
     ) { paddingValues ->
-        SwipeRefresh(
-            state = rememberSwipeRefreshState(isRefreshing.value),
-            onRefresh = {
-                atualizarLista()
-            }
-        ) {
+        Column(modifier = Modifier.padding(paddingValues)) {
             val columns = listOf(
                 listaTarefas.filter { it.status == Constantes.A_FAZER },
                 listaTarefas.filter { it.status == Constantes.EM_PROGRESSO },
                 listaTarefas.filter { it.status == Constantes.CONCLUIDO }
             )
 
+            val coroutineScope = rememberCoroutineScope()
+
+            // TabRow para as abas
+            TabRow(
+                selectedTabIndex = pagerState.currentPage,
+                containerColor = PrimaryColor,
+                contentColor = Color.White
+            ) {
+                columnTitles.forEachIndexed { index, title ->
+                    Tab(
+                        text = { Text(title) },
+                        selected = pagerState.currentPage == index,
+                        onClick = {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(index)
+                            }
+                        }
+                    )
+                }
+            }
+
+            // HorizontalPager para as páginas
             HorizontalPager(
                 count = columns.size,
                 state = pagerState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                verticalAlignment = Alignment.Top
+                modifier = Modifier.fillMaxSize()
             ) { page ->
                 KanbanColumn(
-                    title = columnTitles[page],
                     tarefas = columns[page],
                     navController = navController,
                     atualizarLista = ::atualizarLista
@@ -226,7 +218,6 @@ fun abrirDialogoFiltro(context: android.content.Context, onDateSelected: (Date) 
 
 @Composable
 fun KanbanColumn(
-    title: String,
     tarefas: List<Tarefa>,
     navController: NavController?,
     atualizarLista: () -> Unit
@@ -237,7 +228,6 @@ fun KanbanColumn(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = title, fontSize = 18.sp, fontWeight = FontWeight.Bold)
         if (tarefas.isEmpty()) {
             Box(
                 modifier = Modifier

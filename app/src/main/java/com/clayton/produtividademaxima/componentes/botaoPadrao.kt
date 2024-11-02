@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.clayton.produtividademaxima.ui.theme.vinho
+import com.clayton.produtividademaxima.view.PrimaryColor
 
 @Composable
 fun Botao(
@@ -21,7 +22,7 @@ fun Botao(
         onClick,
         modifier,
         colors = ButtonDefaults.buttonColors(
-            containerColor = vinho,
+            containerColor = PrimaryColor,
             contentColor = Color.White
 
         )

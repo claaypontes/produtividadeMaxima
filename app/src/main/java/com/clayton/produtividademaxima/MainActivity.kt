@@ -1,10 +1,15 @@
 package com.clayton.produtividademaxima
 
+import android.app.Activity
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.*
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -22,6 +27,7 @@ import java.util.concurrent.TimeUnit
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         // Solicita permissão de notificação no Android 13+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -29,6 +35,9 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
+            // Aplica as barras de sistema transparentes
+            TransparentSystemBars()
+
             ProdutividadeMáximaTheme {
 
                 val navController = rememberNavController()
@@ -89,11 +98,22 @@ fun NavGraph(navController: NavHostController, startDestination: String) {
             SalvarTarefa(navController)
         }
         composable("cadastroUsuario") {
-            CadastroUsuario(navController)  // Tela de cadastro
+            CadastroUsuario(navController)
         }
         composable("login") {
             LoginUsuario(navController)
-
         }
+    }
+}
+
+@Composable
+fun TransparentSystemBars() {
+    val view = LocalView.current
+    SideEffect {
+        val window = (view.context as Activity).window
+        window.statusBarColor = Color.Transparent.toArgb()
+        window.navigationBarColor = Color.Transparent.toArgb()
+        val insetsController = WindowCompat.getInsetsController(window, view)
+        insetsController.isAppearanceLightStatusBars = false // true para ícones escuros, false para claros
     }
 }

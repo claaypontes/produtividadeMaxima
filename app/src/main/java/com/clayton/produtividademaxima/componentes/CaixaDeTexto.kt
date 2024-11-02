@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import com.clayton.produtividademaxima.ui.theme.ShapeCaixaTexto
-import com.clayton.produtividademaxima.ui.theme.vinho
+import com.clayton.produtividademaxima.view.PrimaryColor
 
 @Composable
 fun CaixaDeTexto(
@@ -20,22 +20,24 @@ fun CaixaDeTexto(
     label: String,
     maxLines: Int,
     keyboardType: KeyboardType
-){
-
+) {
     OutlinedTextField(
         value = value,
-        onValueChange = onValueChange, // Corrigido: especificar o parâmetro da função
+        onValueChange = onValueChange,
         modifier = modifier,
         label = {
             Text(text = label)
         },
         maxLines = maxLines,
-        singleLine = maxLines == 1,  // Adicionado singleLine baseado no maxLines
+        singleLine = maxLines == 1,
         colors = TextFieldDefaults.colors(
             focusedTextColor = Color.Black,
-            focusedContainerColor = vinho,
-            focusedLabelColor = vinho,
-            cursorColor = vinho,
+            focusedContainerColor = Color.Transparent,
+            focusedLabelColor = PrimaryColor,
+            cursorColor = PrimaryColor,
+            unfocusedLabelColor = Color.Gray, // Ajuste de cor para quando não está focado
+            unfocusedContainerColor = Color.Transparent,
+            unfocusedTextColor = Color.Black
         ),
         shape = ShapeCaixaTexto.small,
         keyboardOptions = KeyboardOptions(
