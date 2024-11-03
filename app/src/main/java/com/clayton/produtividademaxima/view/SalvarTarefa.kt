@@ -2,6 +2,7 @@ package com.clayton.produtividademaxima.view
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -194,6 +195,8 @@ fun SalvarTarefa(navController: NavController) {
                     } else {
                         scope.launch(Dispatchers.IO) {
                             val dataHoraVencimentoTimestamp = dateTimeCalendar.time
+                            Log.d("SalvarTarefa", "Data e Hora Selecionada: $dataHoraVencimentoTimestamp") // Confirmação do valor selecionado
+
                             tarefasRepositorio.salvarTarefa(
                                 tituloTarefa,
                                 descricaoTarefa,

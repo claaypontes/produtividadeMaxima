@@ -14,10 +14,12 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import androidx.work.*
 import com.clayton.produtividademaxima.datasource.TarefaNotifierWorker
 import com.clayton.produtividademaxima.ui.theme.ProdutividadeMáximaTheme
 import com.clayton.produtividademaxima.view.CadastroUsuario
+import com.clayton.produtividademaxima.view.EditarTarefa
 import com.clayton.produtividademaxima.view.ListaTarefas
 import com.clayton.produtividademaxima.view.LoginUsuario
 import com.clayton.produtividademaxima.view.SalvarTarefa
@@ -96,6 +98,14 @@ fun NavGraph(navController: NavHostController, startDestination: String) {
         }
         composable("salvarTarefa") {
             SalvarTarefa(navController)
+        }
+        // Rota para editar tarefa, aceitando um argumento tarefaId
+        composable(
+            "editarTarefa/{tarefaId}",
+            arguments = listOf(navArgument("tarefaId") { type = androidx.navigation.NavType.StringType })
+        ) { backStackEntry ->
+            val tarefaId = backStackEntry.arguments?.getString("tarefaId") ?: ""
+            EditarTarefa(navController, tarefaId)
         }
         composable("cadastroUsuario") {
             CadastroUsuario(navController)

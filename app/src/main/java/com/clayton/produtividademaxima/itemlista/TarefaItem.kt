@@ -240,13 +240,16 @@ fun TarefaItem(
 
                     // Botão de Editar Tarefa
                     TextButton(
-                        onClick = { /* Navegar para tela de edição */ },
+                        onClick = {
+                            navController.navigate("editarTarefa/${tarefa.id}") // Passa o ID da tarefa para a tela de edição
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp)
                     ) {
                         Text("Editar Tarefa")
                     }
+
 
                     // Botão de Deletar Tarefa
                     TextButton(

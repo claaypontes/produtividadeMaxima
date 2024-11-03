@@ -203,7 +203,8 @@ fun ListaTarefas(navController: NavController?) {
                     atualizarLista()
                     showDialogoFiltro = false
                 },
-                filtroDataAtiva = filtroData != null
+                filtroDataAtiva = filtroData != null,
+                onCancel = { showDialogoFiltro = false }
             )
         }
     }
@@ -214,10 +215,11 @@ fun FiltroDataDialog(
     context: android.content.Context,
     onDateSelected: (Date) -> Unit,
     onClearFilter: () -> Unit,
-    filtroDataAtiva: Boolean
+    filtroDataAtiva: Boolean,
+    onCancel: () -> Unit // Adicionado para o botão "Cancelar"
 ) {
     AlertDialog(
-        onDismissRequest = { },
+        onDismissRequest = onCancel,
         title = { Text(text = "Filtrar por Data") },
         text = {
             Column {
@@ -242,9 +244,14 @@ fun FiltroDataDialog(
             }
         },
         dismissButton = {
-            if (filtroDataAtiva) {
-                TextButton(onClick = onClearFilter) {
-                    Text("Limpar Filtro")
+            Row {
+                if (filtroDataAtiva) {
+                    TextButton(onClick = onClearFilter) {
+                        Text("Limpar Filtro")
+                    }
+                }
+                TextButton(onClick = onCancel) {
+                    Text("Cancelar")
                 }
             }
         }

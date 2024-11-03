@@ -29,6 +29,8 @@ class DataSource {
             "userId" to userId,
             "dataVencimento" to dataVencimento
         )
+        // Log para verificar o valor de dataVencimento antes do salvamento
+        Log.d("SalvarTarefa", "Data de Vencimento ao salvar: $dataVencimento")
 
         // Cria o documento com ID automático
         val docRef = db.collection("tarefas").document()
@@ -59,7 +61,7 @@ class DataSource {
         }
     }
 
-    // Função para obter uma tarefa específica pelo ID
+    /*// Função para obter uma tarefa específica pelo ID
     suspend fun getTarefaById(tarefaId: String): Tarefa? {
         return try {
             val document = db.collection("tarefas").document(tarefaId).get().await()
@@ -70,7 +72,40 @@ class DataSource {
             Log.e("DataSource", "Erro ao recuperar tarefa por ID: ${e.message}")
             null
         }
+    }*/
+//////////////////////////////////////////
+    // Função para obter uma tarefa específica pelo ID
+    suspend fun getTarefaById(tarefaId: String): Tarefa? {
+        return try {
+            val document = db.collection("tarefas").document(tarefaId).get().await()
+            val tarefa = document.toObject(Tarefa::class.java)?.apply {
+                id = document.id // Atribui o ID do Firestore ao objeto Tarefa
+
+                // Log para verificar o valor bruto de dataVencimento
+                Log.d("getTarefaById", "Data bruta recebida de dataVencimento: ${document.get("dataVencimento")}")
+
+                // Recupera e converte dataVencimento para Date se necessário
+                val dataVencimento = document.get("dataVencimento")
+                dataHoraVencimento = when (dataVencimento) {
+                    is com.google.firebase.Timestamp -> dataVencimento.toDate()
+                    is Date -> dataVencimento
+                    else -> null // Define null se não puder converter
+                }
+
+                // Log após a conversão
+                Log.d("getTarefaById", "Data convertida de dataHoraVencimento: $dataHoraVencimento")
+            }
+            tarefa
+        } catch (e: Exception) {
+            Log.e("DataSource", "Erro ao recuperar tarefa por ID: ${e.message}")
+            null
+        }
     }
+
+    /////////////////////////////////////
+
+
+
 
     // Função para recuperar as tarefas em tempo real do usuário autenticado
     fun recuperarTarefasDoUsuario(): Flow<MutableList<Tarefa>> {
