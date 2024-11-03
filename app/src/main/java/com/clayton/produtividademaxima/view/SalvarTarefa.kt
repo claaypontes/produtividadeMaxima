@@ -55,32 +55,32 @@ fun SalvarTarefa(navController: NavController) {
         var status by remember { mutableStateOf(Constantes.A_FAZER) }
         var prioridade by remember { mutableStateOf(Constantes.PRIORIDADE_BAIXA) }
 
-        var dataVencimento by remember { mutableStateOf("") }
-        var horaVencimento by remember { mutableStateOf("") }
+        var dataSelecionada by remember { mutableStateOf<Date?>(null) }
+        var horaSelecionada by remember { mutableStateOf<Date?>(null) }
 
         val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
         val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-        val dateTimeCalendar = Calendar.getInstance() // Calendar único para data e hora
+        val dateTimeCalendar = Calendar.getInstance()
 
-        // Date Picker dialog
+        // Dialog para selecionar a data
         val datePickerDialog = DatePickerDialog(
             context,
             { _, year, month, dayOfMonth ->
                 dateTimeCalendar.set(year, month, dayOfMonth)
-                dataVencimento = dateFormat.format(dateTimeCalendar.time)
+                dataSelecionada = dateTimeCalendar.time
             },
             dateTimeCalendar.get(Calendar.YEAR),
             dateTimeCalendar.get(Calendar.MONTH),
             dateTimeCalendar.get(Calendar.DAY_OF_MONTH)
         )
 
-        // Time Picker dialog
+        // Dialog para selecionar a hora
         val timePickerDialog = TimePickerDialog(
             context,
             { _, hourOfDay, minute ->
                 dateTimeCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
                 dateTimeCalendar.set(Calendar.MINUTE, minute)
-                horaVencimento = timeFormat.format(dateTimeCalendar.time)
+                horaSelecionada = dateTimeCalendar.time
             },
             dateTimeCalendar.get(Calendar.HOUR_OF_DAY),
             dateTimeCalendar.get(Calendar.MINUTE),
@@ -130,7 +130,10 @@ fun SalvarTarefa(navController: NavController) {
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
-                Text(text = if (dataVencimento.isEmpty()) "Selecionar Data" else dataVencimento, color = PrimaryColor)
+                Text(
+                    text = dataSelecionada?.let { dateFormat.format(it) } ?: "Selecionar Data",
+                    color = PrimaryColor
+                )
             }
 
             Text(
@@ -145,7 +148,10 @@ fun SalvarTarefa(navController: NavController) {
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
-                Text(text = if (horaVencimento.isEmpty()) "Selecionar Hora" else horaVencimento, color = PrimaryColor)
+                Text(
+                    text = horaSelecionada?.let { timeFormat.format(it) } ?: "Selecionar Hora",
+                    color = PrimaryColor
+                )
             }
 
             Column(
@@ -190,19 +196,23 @@ fun SalvarTarefa(navController: NavController) {
 
             Botao(
                 onClick = {
-                    if (tituloTarefa.isEmpty() || dataVencimento.isEmpty() || horaVencimento.isEmpty()) {
+                    if (tituloTarefa.isEmpty() || dataSelecionada == null || horaSelecionada == null) {
                         Toast.makeText(context, "Preencha o título, data e hora de vencimento!", Toast.LENGTH_SHORT).show()
                     } else {
-                        scope.launch(Dispatchers.IO) {
-                            val dataHoraVencimentoTimestamp = dateTimeCalendar.time
-                            Log.d("SalvarTarefa", "Data e Hora Selecionada: $dataHoraVencimentoTimestamp") // Confirmação do valor selecionado
+                        val dataHoraFinal = Calendar.getInstance().apply {
+                            time = dataSelecionada!!
+                            set(Calendar.HOUR_OF_DAY, horaSelecionada!!.hours)
+                            set(Calendar.MINUTE, horaSelecionada!!.minutes)
+                        }.time
 
+                        scope.launch(Dispatchers.IO) {
+                            Log.d("SalvarTarefa", "Data e Hora Selecionada: $dataHoraFinal")
                             tarefasRepositorio.salvarTarefa(
                                 tituloTarefa,
                                 descricaoTarefa,
                                 prioridade,
                                 status,
-                                dataHoraVencimentoTimestamp
+                                dataHoraFinal
                             )
                             scope.launch(Dispatchers.Main) {
                                 Toast.makeText(context, "Sucesso ao salvar a tarefa!", Toast.LENGTH_SHORT).show()

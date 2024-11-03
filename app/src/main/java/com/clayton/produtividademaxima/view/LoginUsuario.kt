@@ -137,7 +137,11 @@ fun LoginUsuario(navController: NavController?) {
             // Botão de Login
             Button(
                 onClick = {
-                    if (isValidEmail(email)) {
+                    if (email.isEmpty()) {
+                        Toast.makeText(context, "Por favor, insira um e-mail válido.", Toast.LENGTH_SHORT).show()
+                    } else if (senha.isEmpty()) {
+                        Toast.makeText(context, "Por favor, insira a senha.", Toast.LENGTH_SHORT).show()
+                    } else {
                         loading = true
                         scope.launch {
                             auth.signInWithEmailAndPassword(email, senha)
@@ -156,8 +160,6 @@ fun LoginUsuario(navController: NavController?) {
                                     }
                                 }
                         }
-                    } else {
-                        Toast.makeText(context, "Por favor, insira um e-mail válido.", Toast.LENGTH_SHORT).show()
                     }
                 },
                 modifier = Modifier
