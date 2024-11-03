@@ -3,6 +3,7 @@ package com.clayton.produtividademaxima.itemlista
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,7 +11,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PriorityHigh
-import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,11 +18,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.clayton.produtividademaxima.constantes.Constantes
 import com.clayton.produtividademaxima.model.Tarefa
 import com.clayton.produtividademaxima.repositorio.TarefasRepositorio
+import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -38,9 +40,25 @@ fun TarefaItem(
     val tarefasRepositorio = TarefasRepositorio()
     var showStatusDialog by remember { mutableStateOf(false) }
 
-    // Atualiza para usar dataHoraVencimento corretamente
+    // Formata a data de vencimento
     val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
     val dataVencimentoTexto = dateFormat.format(tarefa.dataHoraVencimento)
+
+    // Verifica se a tarefa está vencida considerando Timestamp e Date
+    val dataAtual = Date()
+    val dataVencimento = when (val vencimento = tarefa.dataHoraVencimento) {
+        is Timestamp -> vencimento.toDate()
+        is Date -> vencimento
+        else -> null
+    }
+    val tarefaVencida = dataVencimento?.before(dataAtual) == true && tarefa.status != Constantes.CONCLUIDO
+
+    // Define o estilo de texto com riscado se a tarefa estiver concluída
+    val textoEstilo = if (tarefa.status == Constantes.CONCLUIDO) {
+        TextDecoration.LineThrough
+    } else {
+        TextDecoration.None
+    }
 
     Card(
         modifier = Modifier
@@ -48,12 +66,29 @@ fun TarefaItem(
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .pointerInput(Unit) {
                 detectTapGestures(onLongPress = { showStatusDialog = true })
-            },
+            }
+            .border(2.dp, if (tarefaVencida) Color.Red else Color.Transparent, RoundedCornerShape(16.dp)),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = if (tarefa.status == Constantes.CONCLUIDO) 0.dp else 4.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            // Centraliza o badge "Vencida" no topo se a tarefa estiver vencida
+            if (tarefaVencida) {
+                AssistChip(
+                    onClick = { /* Ação opcional */ },
+                    label = { Text("Vencida") },
+                    colors = AssistChipDefaults.assistChipColors(
+                        containerColor = Color.Red,
+                        labelColor = Color.White
+                    ),
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+                Spacer(modifier = Modifier.height(8.dp)) // Espaço abaixo do badge
+            }
+
             // Linha superior com título e botão de edição
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -62,23 +97,12 @@ fun TarefaItem(
             ) {
                 Text(
                     text = tarefa.tarefa,
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                IconButton(onClick = {
-                    tarefa.id?.let { id ->
-                        navController.navigate("editarTarefa/$id")
-                    } ?: run {
-                        // Log ou mensagem de erro para depuração se o ID estiver faltando
-                        Log.e("TarefaItem", "ID da tarefa é nulo.")
-                    }
-                }) {
-                    Icon(
-                        imageVector = Icons.Filled.Edit,
-                        contentDescription = "Editar Tarefa",
-                        tint = MaterialTheme.colorScheme.primary
+                    style = MaterialTheme.typography.titleLarge.copy( // Aumenta o tamanho da fonte para titleLarge
+                        fontWeight = FontWeight.Bold,
+                        textDecoration = textoEstilo,
+                        color = if (tarefaVencida) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                }
+                )
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -86,8 +110,9 @@ fun TarefaItem(
             // Descrição da tarefa
             Text(
                 text = tarefa.descricao,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                style = MaterialTheme.typography.bodyMedium.copy(textDecoration = textoEstilo),
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                maxLines = if (showStatusDialog) Int.MAX_VALUE else 1
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -119,7 +144,7 @@ fun TarefaItem(
                             Constantes.PRIORIDADE_ALTA -> "Alta"
                             else -> "Sem Prioridade"
                         },
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodySmall.copy(textDecoration = textoEstilo),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -133,10 +158,9 @@ fun TarefaItem(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-
                         text = dataVencimentoTexto,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        style = MaterialTheme.typography.bodySmall.copy(textDecoration = textoEstilo),
+                        color = if (tarefaVencida) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -146,7 +170,7 @@ fun TarefaItem(
     if (showStatusDialog) {
         AlertDialog(
             onDismissRequest = { showStatusDialog = false },
-            title = { Text(text = "Alterar Status") },
+            title = { Text(text = "Alterar Tarefa") },
             text = {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -209,6 +233,35 @@ fun TarefaItem(
                             .padding(horizontal = 16.dp)
                     ) {
                         Text("Concluído")
+                    }
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Divider()
+
+                    // Botão de Editar Tarefa
+                    TextButton(
+                        onClick = { /* Navegar para tela de edição */ },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                    ) {
+                        Text("Editar Tarefa")
+                    }
+
+                    // Botão de Deletar Tarefa
+                    TextButton(
+                        onClick = {
+                            tarefasRepositorio.deletarTarefa(tarefa.id) // Deleta a tarefa pelo ID
+                            Toast.makeText(context, "Tarefa deletada com sucesso", Toast.LENGTH_SHORT).show()
+                            atualizarLista()
+                            showStatusDialog = false
+                        },
+                        colors = ButtonDefaults.textButtonColors(contentColor = Color.Red),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                    ) {
+                        Text("Deletar Tarefa")
                     }
                 }
             },

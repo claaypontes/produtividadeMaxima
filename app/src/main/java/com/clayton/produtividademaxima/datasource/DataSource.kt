@@ -17,11 +17,11 @@ class DataSource {
     private val _todastarefas = MutableStateFlow<MutableList<Tarefa>>(mutableListOf())
     val todastarefas: StateFlow<MutableList<Tarefa>> = _todastarefas
 
-    // Função para salvar a tarefa associada ao userId e status, agora incluindo a data de vencimento como Date
+    // Função para salvar uma tarefa e obter o ID gerado automaticamente pelo Firestore
     fun salvarTarefa(tarefa: String, descricao: String, prioridade: Int, status: Int, dataVencimento: Date) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
-        val tarefaMap = hashMapOf(
+        val tarefaData = hashMapOf(
             "tarefa" to tarefa,
             "descricao" to descricao,
             "status" to status,
@@ -30,37 +30,42 @@ class DataSource {
             "dataVencimento" to dataVencimento
         )
 
-        db.collection("tarefas")
-            .document(tarefa)
-            .set(tarefaMap)
+        // Cria o documento com ID automático
+        val docRef = db.collection("tarefas").document()
+        docRef.set(tarefaData)
             .addOnSuccessListener {
-                Log.d("Firebase", "Tarefa salva com sucesso no Firestore.")
+                Log.d("Firebase", "Tarefa salva com sucesso no Firestore com ID: ${docRef.id}")
             }
             .addOnFailureListener { exception ->
                 Log.e("Firebase", "Erro ao salvar tarefa no Firestore: ${exception.message}")
             }
     }
-    // Função para atualizar uma tarefa completa (nome, descrição, prioridade)
+
+    // Função para atualizar uma tarefa completa usando o ID do Firestore
     suspend fun atualizarTarefa(tarefa: Tarefa) {
-        val tarefaMap = mapOf(
+        val tarefaData = mapOf(
             "tarefa" to tarefa.tarefa,
             "descricao" to tarefa.descricao,
             "status" to tarefa.status,
             "prioridade" to tarefa.prioridade,
             "dataVencimento" to tarefa.dataHoraVencimento
         )
+
         try {
-            db.collection("tarefas").document(tarefa.tarefa).update(tarefaMap).await()
+            db.collection("tarefas").document(tarefa.id).update(tarefaData).await()
             Log.d("Firebase", "Tarefa atualizada com sucesso no Firestore.")
         } catch (e: Exception) {
             Log.e("Firebase", "Erro ao atualizar a tarefa: ${e.message}")
         }
     }
-    // k
+
+    // Função para obter uma tarefa específica pelo ID
     suspend fun getTarefaById(tarefaId: String): Tarefa? {
         return try {
             val document = db.collection("tarefas").document(tarefaId).get().await()
-            document.toObject(Tarefa::class.java)
+            document.toObject(Tarefa::class.java)?.apply {
+                id = document.id // Atribui o ID do Firestore ao objeto Tarefa
+            }
         } catch (e: Exception) {
             Log.e("DataSource", "Erro ao recuperar tarefa por ID: ${e.message}")
             null
@@ -95,7 +100,7 @@ class DataSource {
         for (documento in snapshot.documents) {
             val tarefa = documento.toObject(Tarefa::class.java)
             if (tarefa != null) {
-                // Verifica se `dataVencimento` é Timestamp ou Date e converte para Date conforme necessário
+                tarefa.id = documento.id // Atribui o ID do documento ao campo `id` da tarefa
                 val dataVencimento = documento.get("dataVencimento")
                 tarefa.dataHoraVencimento = when (dataVencimento) {
                     is com.google.firebase.Timestamp -> dataVencimento.toDate()
@@ -108,17 +113,20 @@ class DataSource {
         _todastarefas.value = listaAtualizada // Força uma nova referência para disparar a atualização
     }
 
-    // Função para deletar uma tarefa
-    fun deletarTarefa(tarefa: String) {
-        db.collection("tarefas").document(tarefa).delete().addOnCompleteListener {
-            Log.d("Firebase", "Tarefa deletada com sucesso.")
+    // Função para deletar uma tarefa usando o ID do Firestore
+    fun deletarTarefa(tarefaId: String) {
+        db.collection("tarefas").document(tarefaId).delete().addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                Log.d("Firebase", "Tarefa deletada com sucesso.")
+            } else {
+                Log.e("Firebase", "Erro ao deletar tarefa", task.exception)
+            }
         }
     }
 
-    // Função para atualizar o status de uma tarefa com atualização no fluxo
+    // Função para atualizar o status de uma tarefa pelo ID
     fun atualizarStatusTarefa(tarefa: Tarefa, novoStatus: Int) {
-        val tarefaRef = db.collection("tarefas").document(tarefa.tarefa)
-        tarefaRef.update("status", novoStatus)
+        db.collection("tarefas").document(tarefa.id).update("status", novoStatus)
             .addOnSuccessListener {
                 Log.d("Firebase", "Status da tarefa atualizado com sucesso.")
                 db.collection("tarefas")

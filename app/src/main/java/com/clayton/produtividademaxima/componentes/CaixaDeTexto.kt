@@ -2,6 +2,7 @@ package com.clayton.produtividademaxima.componentes
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -21,23 +22,26 @@ fun CaixaDeTexto(
     maxLines: Int,
     keyboardType: KeyboardType
 ) {
+    val textColor = MaterialTheme.colorScheme.onBackground
+    val labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         modifier = modifier,
         label = {
-            Text(text = label)
+            Text(text = label, color = labelColor)
         },
         maxLines = maxLines,
         singleLine = maxLines == 1,
         colors = TextFieldDefaults.colors(
-            focusedTextColor = Color.Black,
+            focusedTextColor = textColor,
             focusedContainerColor = Color.Transparent,
             focusedLabelColor = PrimaryColor,
             cursorColor = PrimaryColor,
-            unfocusedLabelColor = Color.Gray, // Ajuste de cor para quando não está focado
+            unfocusedLabelColor = labelColor,
             unfocusedContainerColor = Color.Transparent,
-            unfocusedTextColor = Color.Black
+            unfocusedTextColor = textColor
         ),
         shape = ShapeCaixaTexto.small,
         keyboardOptions = KeyboardOptions(

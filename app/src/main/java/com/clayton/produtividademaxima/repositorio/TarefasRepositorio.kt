@@ -20,8 +20,8 @@ class TarefasRepositorio {
     }
 
     // Função para deletar uma tarefa pelo nome
-    fun deletarTarefa(tarefa: String) {
-        dataSource.deletarTarefa(tarefa)
+    fun deletarTarefa(id: String) {
+        dataSource.deletarTarefa(id)
     }
 
     // Função para atualizar o status de uma tarefa

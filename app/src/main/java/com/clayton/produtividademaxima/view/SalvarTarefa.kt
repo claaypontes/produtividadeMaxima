@@ -59,30 +59,30 @@ fun SalvarTarefa(navController: NavController) {
 
         val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
         val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-        val calendar = Calendar.getInstance()
+        val dateTimeCalendar = Calendar.getInstance() // Calendar único para data e hora
 
         // Date Picker dialog
         val datePickerDialog = DatePickerDialog(
             context,
             { _, year, month, dayOfMonth ->
-                calendar.set(year, month, dayOfMonth)
-                dataVencimento = dateFormat.format(calendar.time)
+                dateTimeCalendar.set(year, month, dayOfMonth)
+                dataVencimento = dateFormat.format(dateTimeCalendar.time)
             },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
+            dateTimeCalendar.get(Calendar.YEAR),
+            dateTimeCalendar.get(Calendar.MONTH),
+            dateTimeCalendar.get(Calendar.DAY_OF_MONTH)
         )
 
         // Time Picker dialog
         val timePickerDialog = TimePickerDialog(
             context,
             { _, hourOfDay, minute ->
-                calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
-                calendar.set(Calendar.MINUTE, minute)
-                horaVencimento = timeFormat.format(calendar.time)
+                dateTimeCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
+                dateTimeCalendar.set(Calendar.MINUTE, minute)
+                horaVencimento = timeFormat.format(dateTimeCalendar.time)
             },
-            calendar.get(Calendar.HOUR_OF_DAY),
-            calendar.get(Calendar.MINUTE),
+            dateTimeCalendar.get(Calendar.HOUR_OF_DAY),
+            dateTimeCalendar.get(Calendar.MINUTE),
             true
         )
 
@@ -153,7 +153,6 @@ fun SalvarTarefa(navController: NavController) {
                     .padding(16.dp)
             ) {
                 Text(text = "Status da Tarefa:", fontWeight = FontWeight.Bold, color = textColor)
-
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     RadioButton(selected = status == Constantes.A_FAZER, onClick = { status = Constantes.A_FAZER })
                     Text(text = "A Fazer", color = textColor)
@@ -174,7 +173,6 @@ fun SalvarTarefa(navController: NavController) {
                     .padding(16.dp)
             ) {
                 Text(text = "Prioridade da Tarefa:", fontWeight = FontWeight.Bold, color = textColor)
-
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     RadioButton(selected = prioridade == Constantes.PRIORIDADE_BAIXA, onClick = { prioridade = Constantes.PRIORIDADE_BAIXA })
                     Text(text = "Baixa", color = textColor)
@@ -195,7 +193,7 @@ fun SalvarTarefa(navController: NavController) {
                         Toast.makeText(context, "Preencha o título, data e hora de vencimento!", Toast.LENGTH_SHORT).show()
                     } else {
                         scope.launch(Dispatchers.IO) {
-                            val dataHoraVencimentoTimestamp = calendar.time
+                            val dataHoraVencimentoTimestamp = dateTimeCalendar.time
                             tarefasRepositorio.salvarTarefa(
                                 tituloTarefa,
                                 descricaoTarefa,

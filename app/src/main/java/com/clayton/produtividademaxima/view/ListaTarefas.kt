@@ -7,7 +7,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
@@ -24,8 +23,6 @@ import com.clayton.produtividademaxima.itemlista.TarefaItem
 import com.clayton.produtividademaxima.model.Tarefa
 import com.clayton.produtividademaxima.repositorio.TarefasRepositorio
 import com.google.accompanist.pager.*
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
@@ -47,6 +44,7 @@ fun ListaTarefas(navController: NavController?) {
     var listaTarefas by remember { mutableStateOf<List<Tarefa>>(emptyList()) }
     val isRefreshing = remember { mutableStateOf(false) }
     var filtroData by remember { mutableStateOf<Date?>(null) }
+    var showDialogoFiltro by remember { mutableStateOf(false) }
 
     val columnTitles = listOf("A Fazer", "Em Progresso", "Concluído")
 
@@ -93,25 +91,10 @@ fun ListaTarefas(navController: NavController?) {
             TopAppBar(
                 title = { Text("Lista de Tarefas", fontSize = 20.sp, color = Color.White) },
                 actions = {
-                    IconButton(onClick = {
-                        abrirDialogoFiltro(context) { date ->
-                            filtroData = date
-                            atualizarLista()
-                        }
-                    }) {
+                    IconButton(onClick = { showDialogoFiltro = true }) {
                         Icon(
                             imageVector = Icons.Default.DateRange,
                             contentDescription = "Filtrar por data",
-                            tint = Color.White
-                        )
-                    }
-                    IconButton(onClick = {
-                        filtroData = null
-                        atualizarLista()
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.CheckCircle,
-                            contentDescription = "Limpar Filtro",
                             tint = Color.White
                         )
                     }
@@ -126,6 +109,13 @@ fun ListaTarefas(navController: NavController?) {
                         expanded = showMenu,
                         onDismissRequest = { showMenu = false }
                     ) {
+                        // Exibe o nome do usuário no topo do menu
+                        DropdownMenuItem(
+                            onClick = { /* No action, apenas exibe o nome */ },
+                            enabled = false,
+                            text = { Text("Olá, $nomeUsuario") }
+                        )
+                        Divider() // Linha divisória para separar o nome do resto das opções
                         DropdownMenuItem(
                             onClick = {
                                 showMenu = false
@@ -199,21 +189,66 @@ fun ListaTarefas(navController: NavController?) {
                 )
             }
         }
+
+        if (showDialogoFiltro) {
+            FiltroDataDialog(
+                context = context,
+                onDateSelected = { date ->
+                    filtroData = date
+                    atualizarLista()
+                    showDialogoFiltro = false
+                },
+                onClearFilter = {
+                    filtroData = null
+                    atualizarLista()
+                    showDialogoFiltro = false
+                },
+                filtroDataAtiva = filtroData != null
+            )
+        }
     }
 }
 
-fun abrirDialogoFiltro(context: android.content.Context, onDateSelected: (Date) -> Unit) {
-    val calendar = Calendar.getInstance()
-    DatePickerDialog(
-        context,
-        { _, year, month, dayOfMonth ->
-            calendar.set(year, month, dayOfMonth)
-            onDateSelected(calendar.time)
+@Composable
+fun FiltroDataDialog(
+    context: android.content.Context,
+    onDateSelected: (Date) -> Unit,
+    onClearFilter: () -> Unit,
+    filtroDataAtiva: Boolean
+) {
+    AlertDialog(
+        onDismissRequest = { },
+        title = { Text(text = "Filtrar por Data") },
+        text = {
+            Column {
+                Text("Selecione uma data para filtrar ou limpar o filtro atual.")
+            }
         },
-        calendar.get(Calendar.YEAR),
-        calendar.get(Calendar.MONTH),
-        calendar.get(Calendar.DAY_OF_MONTH)
-    ).show()
+        confirmButton = {
+            TextButton(onClick = {
+                val calendar = Calendar.getInstance()
+                DatePickerDialog(
+                    context,
+                    { _, year, month, dayOfMonth ->
+                        calendar.set(year, month, dayOfMonth)
+                        onDateSelected(calendar.time)
+                    },
+                    calendar.get(Calendar.YEAR),
+                    calendar.get(Calendar.MONTH),
+                    calendar.get(Calendar.DAY_OF_MONTH)
+                ).show()
+            }) {
+                Text("Escolher Data")
+            }
+        },
+        dismissButton = {
+            if (filtroDataAtiva) {
+                TextButton(onClick = onClearFilter) {
+                    Text("Limpar Filtro")
+                }
+            }
+        }
+    )
 }
 
 @Composable
